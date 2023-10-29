@@ -25,15 +25,16 @@ node {
     stage('npm install') {
         sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
     }
-    //stage('backend tests') {
-    //    try {
-    //        sh "./mvnw -ntp verify -P-webapp"
-    //    } catch(err) {
-    //        throw err
-    //    } finally {
-    //        junit '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
-    //    }
-    //}
+
+    stage('backend tests') {
+       try {
+           sh "./mvnw -ntp verify -P-webapp"
+       } catch(err) {
+           throw err
+       } finally {
+           junit '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
+       }
+    }
 
     //stage('frontend tests') {
     //    try {
@@ -45,10 +46,26 @@ node {
     //    }
     //}
 
-    stage('packaging') {
-        sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
-        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+    stage('Preparation') {
+        steps {
+            // Instalar Node.js y Angular CLI
+            sh 'npm install -g @angular/cli'
+        }
     }
+
+    stage('packaging') {
+        steps {
+            // Construir y empaquetar el proyecto
+            sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+        }
+    }
+
+
+    // stage('packaging') {
+    //     sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
+    //     archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+    // }
 
     def dockerImage
     stage('publish docker') {
