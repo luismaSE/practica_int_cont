@@ -46,26 +46,10 @@ node {
     //    }
     //}
 
-    stage('Preparation') {
-        steps {
-            // Instalar Node.js y Angular CLI
-            sh 'npm install -g @angular/cli'
-        }
-    }
-
     stage('packaging') {
-        steps {
-            // Construir y empaquetar el proyecto
-            sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
-            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-        }
+        sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
+        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
     }
-
-
-    // stage('packaging') {
-    //     sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
-    //     archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-    // }
 
     def dockerImage
     stage('publish docker') {
